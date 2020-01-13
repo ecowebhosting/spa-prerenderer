@@ -55,13 +55,13 @@ class Prerenderer {
     stopOnPageError = false,
   } = {}) {
     Options.validate({
-      staticDir: staticDir,
-      routes: routes,
-      outputDir: outputDir,
-      waitForElement: waitForElement,
-      useHttps: useHttps,
-      supressOutput: supressOutput,
-      stopOnPageError: stopOnPageError,
+      staticDir,
+      routes,
+      outputDir,
+      waitForElement,
+      useHttps,
+      supressOutput,
+      stopOnPageError,
     });
     this.routes = routes;
     this.staticDir = staticDir;
