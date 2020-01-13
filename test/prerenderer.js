@@ -1,47 +1,185 @@
 const {should, expect} = require('chai');
+const chai = require('chai');
 const fs = require('fs');
-should();
-
 const Prerenderer = require('..');
-
 const inputDir = __dirname + '/examples/input';
 const outputDir = __dirname + '/examples/output';
-const options = [inputDir, ['/'], outputDir, '#dynamic', false, true];
-const prerenderer = new Prerenderer(...options);
+chai.use(require('chai-as-promised'));
+should();
 
-describe('prerenderer class', function() {
-  it('should be instantiable', function() {
-    prerenderer.should.be.an('object');
+describe('prerenderer construction', function() {
+  context('config validation', function() {
+    it('should require a `staticDir`', function() {
+      const badCall = () => new Prerenderer();
+      expect(badCall).to.throw(
+          Error,
+          'staticDir must be explicitly set.',
+      );
+    });
+    it('should require `staticDir` to be an absolute path', function() {
+      const badCall = () => new Prerenderer({staticDir: './'});
+      expect(badCall).to.throw(
+          Error,
+          'staticDir must be an absolute path.',
+      );
+    });
+    it('should require `routes` to be an array', function() {
+      const badCall = () => new Prerenderer({
+        staticDir: inputDir,
+        routes: '/not-an-array',
+      });
+      expect(badCall).to.throw(
+          TypeError,
+          'routes must be an array.',
+      );
+    });
+    it('should require `useHttps` to be a boolean', function() {
+      const badCall = () => new Prerenderer({
+        staticDir: inputDir,
+        useHttps: 'notABoolean',
+      });
+      expect(badCall).to.throw(
+          TypeError,
+          'useHttps must be a boolean value.',
+      );
+    });
+    it('should require `supressOutput` to be a boolean', function() {
+      const badCall = () => new Prerenderer({
+        staticDir: inputDir,
+        supressOutput: 'notABoolean',
+      });
+      expect(badCall).to.throw(
+          TypeError,
+          'supressOutput must be a boolean value.',
+      );
+    });
+    it('should require `stopOnPageError` to be a boolean', function() {
+      const badCall = () => new Prerenderer({
+        staticDir: inputDir,
+        stopOnPageError: 'notABoolean',
+      });
+      expect(badCall).to.throw(
+          TypeError,
+          'stopOnPageError must be a boolean value.',
+      );
+    });
+  });
+  context('valid options given', function() {
+    it('should be instantiable with https', function() {
+      const prerenderer = new Prerenderer({
+        staticDir: inputDir,
+        routes: ['/'],
+        outputDir: outputDir,
+        waitForElement: '#dynamic',
+        useHttps: true,
+        supressOutput: true,
+      });
+      expect(prerenderer).to.exist;
+      prerenderer.server.destroy();
+    });
+
+    it('should be instantiable with http', function() {
+      const prerenderer = new Prerenderer({
+        staticDir: inputDir,
+        routes: ['/'],
+        outputDir: outputDir,
+        waitForElement: '#dynamic',
+        useHttps: false,
+        supressOutput: true,
+      });
+      expect(prerenderer).to.exist;
+      prerenderer.server.destroy();
+    });
   });
 });
 
 describe('prerender init', function() {
-  describe('puppeteer instance', function() {
-    it('should open', async function() {
-      await prerenderer.startBrowser();
-      expect(prerenderer.browser, 'Prerenderer puppeteer instance')
-          .to.be.an('object');
+  context('https server', function() {
+    const httpsPrerenderer = new Prerenderer({
+      staticDir: inputDir,
+      routes: ['/'],
+      outputDir: outputDir,
+      waitForElement: '#dynamic',
+      useHttps: true,
+      supressOutput: true,
+    });
+
+    describe('puppeteer instance', async () => {
+      await it('should open', async () => {
+        await httpsPrerenderer.startBrowser();
+        expect(httpsPrerenderer.browser, 'Prerenderer puppeteer instance')
+            .to.be.an('object');
+      });
+    });
+
+    describe('prerender output', async () => {
+      await it('should save index.html to the correct path', async () => {
+        await httpsPrerenderer.init();
+        await fs.existsSync(`${outputDir}/index.html`)
+            .should.be.true;
+      });
+
+      await it('should match prerender input', () => {
+        const output = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
+        output.should.contain(
+            '<section id="dynamic"><h2>Dynamic bit</h2>',
+            'Actual output does not match expected output',
+        );
+      });
     });
   });
 
-  describe('prerender output', function() {
-    it('should save an index.html be saved in the right place', async () => {
-      await prerenderer.init();
-      fs.existsSync(`${outputDir}/index.html`)
-          .should.be.true;
+
+  context('http server', function() {
+    const httpPrerenderer = new Prerenderer({
+      staticDir: inputDir,
+      routes: ['/'],
+      outputDir: outputDir,
+      waitForElement: '#dynamic',
+      useHttps: false,
+      supressOutput: true,
     });
-    it('should match prerender input', () => {
-      const output = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
-      output.should.contain(
-          '<section id="dynamic"><h2>Dynamic bit</h2>',
-          'Actual output does not match expected output',
-      );
+
+    describe('puppeteer instance', () => {
+      it('should open', async () => {
+        await httpPrerenderer.startBrowser();
+        expect(httpPrerenderer.browser, 'Prerenderer puppeteer instance')
+            .to.be.an('object');
+      });
+    });
+
+    describe('prerender output', async () => {
+      await it('should save index.html to the correct path', async () => {
+        await httpPrerenderer.init();
+        await fs.existsSync(`${outputDir}/index.html`)
+            .should.be.true;
+      });
+      await it('should match prerender input', () => {
+        const output = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
+        output.should.contain(
+            '<section id="dynamic"><h2>Dynamic bit</h2>',
+            'Actual output does not match expected output',
+        );
+      });
     });
   });
 
-  describe('server', function() {
-    it('should terminate upon running destroy()', async function() {
-      await prerenderer.server.destroy();
+  context('load page w/ JS error and `stopOnPageError` turned on', async () => {
+    const prerenderer = new Prerenderer({
+      staticDir: inputDir,
+      routes: ['/error_in_js.html'],
+      outputDir: outputDir,
+      waitForElement: '#dynamic',
+      useHttps: true,
+      supressOutput: true,
+      stopOnPageError: true,
+    });
+
+    it('should throw an error and fail', async () => {
+      expect(
+          await prerenderer.init(),
+          'Attempt to prerender page with error with stopOnPageError turned on',
+      ).to.be.rejectedWith(Error);
     });
   });
 });

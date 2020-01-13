@@ -1,4 +1,6 @@
-<!DOCTYPE html><html><head>
+<!DOCTYPE html>
+<html>
+    <head>
         <title>Prerenderer test</title>
     </head>
     <body>
@@ -14,7 +16,7 @@
                 const h2 = document.createElement('h2');
                 const p = document.createElement('p');
                 const a = document.createElement('a');
-                const date = new Date().toString();
+                const date = new Date().noSuchMethod(); // Trigger error
                 section.setAttribute('id', 'dynamic');
                 h2.innerHTML = 'Dynamic bit';
                 p.innerHTML = `Everything in this section is generated dynamically on ${date}`;
@@ -26,6 +28,5 @@
                 section.append(a);
             };
         </script>
-    
-
-<section id="dynamic"><h2>Dynamic bit</h2><p>Everything in this section is generated dynamically on Mon Jan 13 2020 21:23:39 GMT+0000 (Greenwich Mean Time)</p><a href="//example.com">This is a link with a relative protocol href</a></section></body></html>
+    </body>
+</html>
