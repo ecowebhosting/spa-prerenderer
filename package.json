@@ -4,7 +4,7 @@
   "description": "A prerenderer for Single Page Applications",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --exit"
+    "test": "mocha --exit --timeout=20000"
   },
   "repository": {
     "type": "git",

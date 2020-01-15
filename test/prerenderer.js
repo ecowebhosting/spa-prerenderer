@@ -53,14 +53,14 @@ describe('prerenderer construction', function() {
           'supressOutput must be a boolean value.',
       );
     });
-    it('should require `stopOnPageError` to be a boolean', function() {
+    it('should require `reportPageErrors` to be a boolean', function() {
       const badCall = () => new Prerenderer({
         staticDir: inputDir,
-        stopOnPageError: 'notABoolean',
+        reportPageErrors: 'notABoolean',
       });
       expect(badCall).to.throw(
           TypeError,
-          'stopOnPageError must be a boolean value.',
+          'reportPageErrors must be a boolean value.',
       );
     });
   });
@@ -105,7 +105,7 @@ describe('prerender init', function() {
     });
 
     describe('puppeteer instance', async () => {
-      await it('should open', async () => {
+      it('should open', async () => {
         await httpsPrerenderer.startBrowser();
         expect(httpsPrerenderer.browser, 'Prerenderer puppeteer instance')
             .to.be.an('object');
@@ -113,13 +113,13 @@ describe('prerender init', function() {
     });
 
     describe('prerender output', async () => {
-      await it('should save index.html to the correct path', async () => {
+      it('should save index.html to the correct path', async () => {
         await httpsPrerenderer.init();
-        await fs.existsSync(`${outputDir}/index.html`)
+        fs.existsSync(`${outputDir}/index.html`)
             .should.be.true;
       });
 
-      await it('should match prerender input', () => {
+      it('should match prerender input', () => {
         const output = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
         output.should.contain(
             '<section id="dynamic"><h2>Dynamic bit</h2>',
@@ -149,37 +149,18 @@ describe('prerender init', function() {
     });
 
     describe('prerender output', async () => {
-      await it('should save index.html to the correct path', async () => {
+      it('should save index.html to the correct path', async () => {
         await httpPrerenderer.init();
-        await fs.existsSync(`${outputDir}/index.html`)
+        fs.existsSync(`${outputDir}/index.html`)
             .should.be.true;
       });
-      await it('should match prerender input', () => {
+      it('should match prerender input', () => {
         const output = fs.readFileSync(`${outputDir}/index.html`, 'utf8');
         output.should.contain(
             '<section id="dynamic"><h2>Dynamic bit</h2>',
             'Actual output does not match expected output',
         );
       });
-    });
-  });
-
-  context('load page w/ JS error and `stopOnPageError` turned on', async () => {
-    const prerenderer = new Prerenderer({
-      staticDir: inputDir,
-      routes: ['/error_in_js.html'],
-      outputDir: outputDir,
-      waitForElement: '#dynamic',
-      useHttps: true,
-      supressOutput: true,
-      stopOnPageError: true,
-    });
-
-    it('should throw an error and fail', async () => {
-      expect(
-          await prerenderer.init(),
-          'Attempt to prerender page with error with stopOnPageError turned on',
-      ).to.be.rejectedWith(Error);
     });
   });
 });

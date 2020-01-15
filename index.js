@@ -38,12 +38,12 @@ class Prerenderer {
    * @param   {boolean} options.supressOutput   Whether or not to output
    *                                            to the console.
    *
-   * @param   {boolean} options.stopOnPageError Whether the prerenderer should
-   *                                            throw an exception if an error
-   *                                            on the page to be rendered
-   *                                            occurs. Useful if that error
-   *                                            prevents the `waitForElement`
-   *                                            element from being rendered.
+   * @param   {boolean} options.reportPageErrors Whether the prerenderer should
+   *                                             output errors from the page
+   *                                             being rendered. Useful if that
+   *                                             error prevents the
+   *                                             `waitForElement` element from
+   *                                             being rendered.
    */
   constructor({
     staticDir = null,
@@ -52,7 +52,7 @@ class Prerenderer {
     waitForElement = null,
     useHttps = true,
     supressOutput = false,
-    stopOnPageError = false,
+    reportPageErrors = false,
   } = {}) {
     Options.validate({
       staticDir,
@@ -61,7 +61,7 @@ class Prerenderer {
       waitForElement,
       useHttps,
       supressOutput,
-      stopOnPageError,
+      reportPageErrors,
     });
     this.routes = routes;
     this.staticDir = staticDir;
@@ -69,9 +69,8 @@ class Prerenderer {
     this.waitForElement = waitForElement;
     this.useHttps = useHttps;
     this.supressOutput = supressOutput;
-    this.stopOnPageError = stopOnPageError;
+    this.reportPageErrors = reportPageErrors;
     this.port = portfinder.getPort(3000);
-
     const serverOptions = {
       server: {port: this.port},
       useHttps: useHttps,
@@ -129,14 +128,18 @@ class Prerenderer {
    * @return  {void}
    */
   async startBrowser() {
-    this.browser = await puppeteer.launch({
-      headless: true,
-      ignoreHTTPSErrors: true,
-      defaultViewport: null,
-      args: [
-        '--ignore-certificate-errors',
-      ],
-    });
+    try {
+      this.browser = await puppeteer.launch({
+        headless: false,
+        ignoreHTTPSErrors: true,
+        defaultViewport: null,
+        args: [
+          '--ignore-certificate-errors',
+        ],
+      });
+    } catch (e) {
+      throw e;
+    }
   }
 
   /**
@@ -152,29 +155,24 @@ class Prerenderer {
    *                            and this.stopOnPageError is true
    */
   async getMarkup(route) {
-    const page = await this.browser.newPage();
-    page.on('error', (err) => {
-      if (this.stopOnPageError === true) {
-        throw err;
-      }
-      console.log(
-          `Error: ${err.toString()}` +
-          `If this prevents the \`waitForElement\` element ` +
-          `${this.waitForElement} from loading, the prerender will timeout.`,
-      );
-    });
-    page.on('pageerror', (err) => {
-      if (this.stopOnPageError === true) {
-        throw err;
-      }
-      console.log(
-          `Page error: ${err.toString()}` +
-          `If this prevents the \`waitForElement\` element ` +
-          `${this.waitForElement} from loading, the prerender will timeout.`,
-      );
-    });
     const s = this.useHttps === true ? 's' : '';
     const url = `http${s}://localhost:${this.port}${route}`;
+    const page = await this.browser.newPage();
+
+    if (this.reportPageErrors === true) {
+      page.on('pageerror', (err) => {
+        const errorHint = this.waitForElement !== null ?
+          chalk`This may prevent the element {bold ${this.waitForElement}}` +
+          ` from rendering, causing a timeout.` :
+          '';
+        console.error(
+            chalk`{bgRed.white {bold Error from the page being rendered:}}`,
+        );
+        console.error(chalk`{red ${err}}`);
+        console.error(chalk`{red ${errorHint}}`);
+      });
+    }
+
     await page.goto(url, {timeout: 60000});
     if (this.waitForElement !== null) {
       await page.waitForSelector(this.waitForElement, {timeout: 60000});
