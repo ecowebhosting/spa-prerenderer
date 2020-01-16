@@ -6,7 +6,7 @@ It works by creating a server instance to serve routes of a site, then using [Pu
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running. See [Usage](#usage) section for… well… how to use it.
 
 ### Prerequisites
 
@@ -26,7 +26,7 @@ Or use npm:
 $ npm install ecowebhosting/spa-prerenderer
 ```
 
-## Usage
+## Usage <a name="usage"></a>
 
 Once the prerenderer is installed, include it in the top of the file you want to use it in (if not installed via npm, you will need to make sure the path matches the install location):
 
