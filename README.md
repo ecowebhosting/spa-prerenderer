@@ -88,7 +88,7 @@ The absolute path to the directory the prerendered files should be output to.
 #### `waitForElement` {string}
 If set, the prerenderer will wait for an element with the identifier specified here to render before capturing the markup and saving it to the output directory. This can be set to ensure the output isn't saved before the dynamically rendered page has finished rendering what is intended.
 
-For example, for a Vue app that renders content to an element with the ID of 'app', this option should be set to '#app'.
+For example, for a Vue app that renders content to an element with the ID of 'app', this option should be set to `#app`.
 
 Beware: If an error on the page prevents this element from loading, the prerenderer will wait indefinitely before timing out. If this is a possibility, the `reportPageErrors` option can provide some handy insight.
 
