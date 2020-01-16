@@ -152,3 +152,7 @@ This project is licenced under the GNU GENERAL PUBLIC LICENSE - see the [LICENCE
 * StackOverflow (of course) for help
 * Chris Fritz's [prerender-spa-plugin](https://github.com/chrisvfritz/prerender-spa-plugin) for inspiration
 
+## Usage examples
+
+* Used in [Eco Web Hosting](https://www.ecowebhosting.co.uk/) CI/CD process.
+
