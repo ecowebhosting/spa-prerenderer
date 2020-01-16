@@ -1,0 +1,47 @@
+{
+  "name": "spa-prerenderer",
+  "version": "1.0.0",
+  "description": "A prerenderer for Single Page Applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --exit --timeout=20000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ecowebhosting/spa-prerenderer.git"
+  },
+  "keywords": [
+    "prerenderer",
+    "prerender",
+    "spa",
+    "vue",
+    "vue.js",
+    "react",
+    "angular"
+  ],
+  "author": {
+    "name": "Andy Dunn",
+    "email": "andy@d-unn.uk",
+    "url": "https://d-unn.uk/"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ecowebhosting/spa-prerenderer/issues"
+  },
+  "homepage": "https://github.com/ecowebhosting/spa-prerenderer#readme",
+  "dependencies": {
+    "chalk": "^3.0.0",
+    "express": "^4.17.1",
+    "portfinder-sync": "0.0.2",
+    "puppeteer": "^2.0.0",
+    "selfsigned": "^1.10.7"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^6.8.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-import": "^2.19.1",
+    "mocha": "^7.0.0"
+  }
+}
