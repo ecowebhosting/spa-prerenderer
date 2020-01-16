@@ -130,7 +130,7 @@ class Prerenderer {
   async startBrowser() {
     try {
       this.browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true,
         defaultViewport: null,
         args: [
