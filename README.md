@@ -124,7 +124,7 @@ $ npm test
 ## Built With
 
 * [eslint](https://eslint.org/) - Linter
-* [npm](https://npmjs.com/) - Dependency Management
+* [npm](https://npmjs.com/) - Dependency management
 * [mocha](https://mochajs.org/) - Test suite
 * [chai](https://www.chaijs.com/) - Assertion library
 * [chai-as-promised](https://github.com/domenic/chai-as-promised) - Async extension to chai
