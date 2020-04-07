@@ -1,6 +1,6 @@
 {
   "name": "spa-prerenderer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A prerenderer for Single Page Applications",
   "main": "index.js",
   "scripts": {
